@@ -266,6 +266,7 @@ class Handler(BaseHTTPRequestHandler):
         return _build_csp_report_only_policy(extra_connect_src)
 
     def end_headers(self) -> None:
+        self.send_header("Access-Control-Allow-Origin", "*")
         extra_connect_src = getattr(self, "_csp_extra_connect_src", None)
         self.send_header("Content-Security-Policy-Report-Only", self.csp_report_only_policy(extra_connect_src))
         self.send_header("Report-To", self._CSP_REPORT_TO)
@@ -384,7 +385,6 @@ class Handler(BaseHTTPRequestHandler):
         """Handle CORS preflight requests."""
         self._req_t0 = time.time()
         self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
