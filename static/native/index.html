@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Glass · Cognitive Surface</title>
+<!-- 字体：系统优先，避免 CSP 拦截 Google Fonts -->
+<style>
+  @font-face { font-family: 'Inter'; src: local('Inter'), local('Segoe UI'), local('PingFang SC'), local('Microsoft YaHei'); }
+  @font-face { font-family: 'JetBrains Mono'; src: local('JetBrains Mono'), local('Consolas'), local('monospace'); }
+</style>
+<link rel="stylesheet" href="styles/theme.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/animations.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body data-theme="midnight">
+
+<!-- ══ 背景记忆图谱 ══ -->
+<div class="grid-overlay"></div>
+<div id="memory-graph">
+  <svg id="graph-svg"></svg>
+</div>
+<div id="tip" style="display:none;position:fixed;z-index:100;pointer-events:none;
+  padding:6px 10px;background:rgba(0,0,0,0.85);color:var(--ink);
+  border:1px solid var(--line-strong);border-radius:6px;font-size:12px;"></div>
+
+<!-- ══ 主布局 ══ -->
+<div id="app-layout">
+
+  <!-- 左面板：Session 会话列表 -->
+  <aside id="session-sidebar">
+    <div class="brand-block">
+      <div class="brand-logo" style="background:#0a0a0a;overflow:hidden;">
+      <svg width="32" height="32" viewBox="0 0 100 100" style="display:block;">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffd700"/><stop offset="100%" stop-color="#b8860b"/>
+          </linearGradient>
+        </defs>
+        <!-- 光環 -->
+        <circle cx="50" cy="50" r="46" fill="none" stroke="url(#g)" stroke-width="1" opacity="0.4"/>
+        <!-- 國際象棋騎士剪影 - 馬頭 -->
+        <path d="
+          M 30 75
+          C 30 65 28 58 32 52
+          C 34 48 36 44 40 40
+          C 42 38 44 34 46 30
+          C 48 26 50 22 54 20
+          L 58 18
+          C 60 17 64 16 66 18
+          C 68 20 70 24 68 28
+          L 66 30
+          C 68 30 72 28 74 26
+          C 78 22 82 24 80 30
+          C 78 34 74 36 72 38
+          L 70 40
+          C 72 42 74 46 74 50
+          C 74 54 72 58 68 62
+          C 64 66 58 70 52 72
+          C 44 74 38 76 30 75 Z
+        " fill="url(#g)"/>
+        <!-- 馬眼 -->
+        <circle cx="60" cy="32" r="2.5" fill="#0a0a0a"/>
+        <!-- 馬鬃 -->
+        <path d="M 46 30 C 44 28 38 26 34 28 C 32 30 32 34 34 38" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- 韁繩 -->
+        <path d="M 62 42 C 58 50 52 56 48 62" fill="none" stroke="#b8860b" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- 底部光線 -->
+        <line x1="25" y1="88" x2="75" y2="88" stroke="url(#g)" stroke-width="0.5" opacity="0.5"/>
+      </svg>
+    </div>
+      <div class="brand-info">
+        <div class="brand-name" id="brand-name">Hermes Glass</div>
+        <div class="brand-subtitle">认知界面 · Cognitive Surface</div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <span class="status-dot online" id="conn-dot"></span>
+      <span id="conn-text">已连接</span>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-label">Sessions</span>
+        <span class="stat-value" id="stat-sessions">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Memories</span>
+        <span class="stat-value" id="stat-memories">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">tok/s</span>
+        <span class="stat-value" id="stat-tok-rate">—</span>
+      </div>
+    </div>
+
+    <div class="ai-activity">
+      <span class="ai-activity-dot" id="ai-activity-dot"></span>
+      <span id="ai-activity-label">空闲</span>
+    </div>
+
+    <div class="panel-header">
+      <span class="panel-title">会话</span>
+      <span style="font-size:11px;color:var(--dim)" id="session-count">0</span>
+    </div>
+
+    <div class="panel-body" id="session-list">
+      <button class="new-session-btn" id="new-session-btn">+ 新会话</button>
+      <div style="text-align:center;color:var(--dim);padding:20px;font-size:12px;" id="session-empty">
+        暂无会话
+      </div>
+    </div>
+
+    <!-- 主题已搬入设定面板，侧栏唔再显示 -->
+
+    <!-- 語音點雲球 -->
+    <div style="padding:12px 16px;display:flex;justify-content:center;border-top:1px solid var(--line);">
+      <canvas id="voice-canvas" width="180" height="180"
+        style="width:90px;height:90px;border-radius:50%;cursor:pointer;"
+        title="點擊切換麥克風"></canvas>
+    </div>
+
+    <div class="actions-row">
+      <button class="icon-btn" id="settings-btn" title="设置 (S)">⚙</button>
+      <button class="icon-btn" id="voice-btn" title="语音 (V)">🎤</button>
+      <button class="icon-btn" id="memory-graph-toggle-btn" title="记忆图谱">◉</button>
+      <span style="flex:1;"></span>
+      <span style="font-size:10px;color:var(--dim);align-self:center;">Hermes Glass v1.0</span>
+    </div>
+  </aside>
+
+  <!-- 侧栏折叠按钮 -->
+  <button class="panel-toggle" id="sidebar-toggle" title="折叠侧栏">◀</button>
+
+  <!-- 中栏：聊天区域 -->
+  <main id="chat-view">
+    <!-- 思考流（可折叠） -->
+    <div class="thought-stream-panel" id="thought-stream-panel">
+      <div class="thought-stream-header" id="thought-stream-header" title="点击折叠思考流">
+        <span class="thought-stream-title">⚡ 思考流</span>
+        <span class="thought-stream-toggle" id="thought-stream-toggle">▾</span>
+      </div>
+      <div class="stream-container" id="thought-stream">
+        <div class="stream-line">
+          <span class="stream-time">--:--:--</span>
+          <span class="stream-msg">系统就绪 · 等待 Hermes 连接…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 聊天消息 -->
+    <div id="chat-messages"></div>
+
+    <!-- 输入栏 -->
+    <div id="composer">
+      <div class="composer-row">
+        <svg class="composer-context-ring" id="context-ring" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="16" fill="none"
+            stroke="var(--line-strong)" stroke-width="3"/>
+          <circle cx="20" cy="20" r="16" fill="none"
+            stroke="var(--brand-primary)" stroke-width="3"
+            stroke-dasharray="100.5" stroke-dashoffset="100.5"
+            stroke-linecap="round" transform="rotate(-90 20 20)"
+            id="context-ring-arc"/>
+          <text x="20" y="24" text-anchor="middle" fill="var(--ink2)" font-size="10">0%</text>
+        </svg>
+        <input id="msg-input" type="text" placeholder="向 Hermes 发消息… (输入 / 调出命令)" autocomplete="off">
+        <button id="send-btn" type="button">发送</button>
+      </div>
+      <!-- 斜杠命令菜单 -->
+      <div id="slash-menu" role="listbox" aria-label="命令" hidden
+        style="position:absolute;bottom:100%;left:60px;right:80px;margin-bottom:6px;
+        background:var(--panel);backdrop-filter:blur(16px);
+        border:1px solid var(--line-strong);border-radius:var(--radius-md);
+        padding:6px;max-height:200px;overflow-y:auto;z-index:50;">
+      </div>
+    </div>
+  </main>
+
+  <!-- 右面板折叠按钮 -->
+  <button class="panel-toggle" id="info-toggle" title="折叠面板">▶</button>
+
+  <!-- 右面板：信息面板 -->
+  <aside id="info-panel">
+    <div class="panel-header">
+      <span class="panel-title">Agent 状态</span>
+    </div>
+
+    <div class="panel-body" style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- 连接状态 -->
+      <div style="padding:10px;border-radius:var(--radius-sm);
+        background:var(--panel-hover);border:1px solid var(--line);">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">连接状态</div>
+        <div style="font-size:13px;color:var(--ok);" id="info-status">● 在线</div>
+        <div style="font-size:12px;color:var(--ink2);" id="info-model">—</div>
+      </div>
+
+      <!-- Token 用量 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;">Token 用量</div>
+      <div id="token-usage" style="display:flex;flex-direction:column;gap:3px;font-size:11px;padding:6px 0;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--ink2);">输入</span><span style="color:var(--ink);" id="tok-input">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--ink2);">输出</span><span style="color:var(--ink);" id="tok-output">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--ink2);">缓存命中</span><span style="color:var(--ok);" id="tok-cache">—</span></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--ink2);">累计成本</span><span style="color:var(--warn);" id="tok-cost">—</span></div>
+      </div>
+
+      <!-- 活跃焦点 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;">活跃焦点</div>
+      <div id="focus-list" style="display:flex;flex-direction:column;gap:4px;font-size:11px;max-height:150px;overflow-y:auto;">
+        <div style="color:var(--dim);text-align:center;padding:8px;">加载中…</div>
+      </div>
+
+      <!-- 图谱图例 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;margin-top:4px;">图谱图例</div>
+      <div id="memory-legend" style="display:flex;flex-direction:column;gap:3px;font-size:10px;">
+        <div style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
+          <span><span style="width:8px;height:8px;border-radius:50%;background:var(--accent-warm);box-shadow:0 0 6px var(--accent-warm);display:inline-block;vertical-align:middle;"></span> <span style="color:var(--ink);">活跃焦点</span></span>
+          <span style="color:var(--accent-warm);" id="legend-active-count">—</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
+          <span><span style="width:7px;height:7px;border-radius:50%;background:var(--accent-cool);opacity:0.6;display:inline-block;vertical-align:middle;"></span> <span style="color:var(--ink);">休眠焦点</span></span>
+          <span style="color:var(--accent-cool);" id="legend-inactive-count">—</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
+          <span><span style="width:7px;height:7px;border-radius:50%;background:var(--brand-primary);opacity:0.6;display:inline-block;vertical-align:middle;"></span> <span style="color:var(--ink);">记忆事实</span></span>
+          <span style="color:var(--brand-primary);" id="legend-fact-count">—</span>
+        </div>
+      </div>
+
+      <!-- Cron 任務 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;margin-top:4px;">定时任务</div>
+      <div id="cron-list" style="display:flex;flex-direction:column;gap:3px;font-size:10px;max-height:100px;overflow-y:auto;">
+        <div style="color:var(--dim);text-align:center;padding:4px;">加载中…</div>
+      </div>
+
+      <!-- 工作区文件 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;margin-top:4px;">工作区</div>
+      <div id="workspace-list" style="display:flex;flex-direction:column;gap:2px;font-size:10px;max-height:120px;overflow-y:auto;">
+        <div style="color:var(--dim);text-align:center;padding:4px;">加载中…</div>
+      </div>
+
+      <!-- 记忆搜索 -->
+      <div style="font-size:12px;color:var(--dim);font-weight:600;margin-top:4px;">记忆搜索</div>
+      <div style="display:flex;gap:4px;">
+        <input id="memory-search-input" type="text" placeholder="搜索 5239 条消息…"
+          style="flex:1;padding:4px 8px;background:var(--panel);border:1px solid var(--line);border-radius:4px;color:var(--ink);font-size:11px;">
+        <button id="memory-search-btn" style="padding:4px 10px;background:var(--panel-hover);border:1px solid var(--line);border-radius:4px;color:var(--ink2);cursor:pointer;font-size:11px;">搜</button>
+      </div>
+      <div id="memory-search-results" style="display:flex;flex-direction:column;gap:3px;font-size:10px;max-height:120px;overflow-y:auto;margin-top:4px;"></div>
+
+      <!-- 快捷操作 -->
+      <div style="border-top:1px solid var(--line);padding-top:10px;">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:8px;">快捷操作</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <button id="qa-new-session" type="button"
+            style="width:100%;padding:7px 10px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;font-size:12px;text-align:left;">＋ 新会话</button>
+          <button id="qa-clear-chat" type="button"
+            style="width:100%;padding:7px 10px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;font-size:12px;text-align:left;">🗑 清空聊天</button>
+          <button id="qa-reset-graph" type="button"
+            style="width:100%;padding:7px 10px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;font-size:12px;text-align:left;">🔄 重置视图</button>
+          <button id="qa-graph-toggle" type="button"
+            style="width:100%;padding:7px 10px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;font-size:12px;text-align:left;">◉ 切换图谱</button>
+          <a href="/" target="_blank"
+            style="display:block;width:100%;padding:7px 10px;background:var(--brand-glow);border:1px solid var(--brand-primary);border-radius:6px;color:var(--brand-primary);cursor:pointer;font-size:12px;text-align:left;text-decoration:none;">🔗 打开官方 WebUI</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ══ 设置弹窗 (隐藏) ══ -->
+<div id="settings-overlay" hidden
+  style="position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
+  <div style="background:var(--panel);backdrop-filter:blur(24px);
+    border:1px solid var(--line-strong);border-radius:var(--radius-lg);
+    padding:28px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;
+    box-shadow:var(--shadow-float);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <span style="font-size:18px;font-weight:700;color:var(--ink);">设置</span>
+      <button id="settings-close" style="background:none;border:none;color:var(--ink2);
+        font-size:22px;cursor:pointer;">×</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- 主题 -->
+      <div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px;">主题</div>
+        <div class="theme-switcher" style="padding:0;border:none;flex-wrap:wrap;">
+          <div class="theme-dot active" data-t="midnight" title="Midnight Steel"></div>
+          <div class="theme-dot" data-t="aurora" title="Aurora Violet"></div>
+          <div class="theme-dot" data-t="forest" title="Forest CRT"></div>
+          <div class="theme-dot" data-t="crimson" title="Crimson Dusk"></div>
+          <div class="theme-dot" data-t="abyss" title="Abyss Deep"></div>
+          <div class="theme-dot" data-t="arctic" title="Arctic Light"></div>
+          <div class="theme-dot" data-t="sand" title="Warm Sand"></div>
+        </div>
+      </div>
+
+      <!-- 語言 -->
+      <div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px;">语言 / Language</div>
+        <div style="display:flex;gap:6px;">
+          <button class="lang-btn active" data-lang="zh" style="padding:6px 16px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;">中文</button>
+          <button class="lang-btn" data-lang="en" style="padding:6px 16px;background:var(--panel-hover);border:1px solid var(--line);border-radius:6px;color:var(--ink);cursor:pointer;">English</button>
+        </div>
+      </div>
+
+      <!-- LLM 模型 -->
+      <div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px;">LLM 模型</div>
+        <div id="settings-llm-status" style="font-size:13px;color:var(--ink2);">—</div>
+      </div>
+
+      <!-- Provider -->
+      <div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px;">Provider</div>
+        <select id="settings-provider" style="width:100%;padding:8px;background:var(--panel);
+          border:1px solid var(--line-strong);border-radius:var(--radius-sm);color:var(--ink);">
+          <option value="deepseek">DeepSeek</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="custom">自定义端点</option>
+        </select>
+      </div>
+
+      <!-- API Key -->
+      <div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px;">API Key</div>
+        <input id="settings-apikey" type="password" placeholder="留空保持原值…"
+          style="width:100%;padding:8px;background:var(--panel);border:1px solid var(--line-strong);
+          border-radius:var(--radius-sm);color:var(--ink);font-family:monospace;">
+      </div>
+
+      <!-- 保存按钮 -->
+      <button id="settings-save"
+        style="padding:10px;background:linear-gradient(135deg,var(--brand-primary),var(--brand-secondary));
+        color:white;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;">
+        保存配置
+      </button>
+      <span id="settings-feedback" style="font-size:12px;color:var(--ok);text-align:center;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACUI 卡片宿主 ══ -->
+<div id="acui-host"></div>
+
+<!-- ══ 应用入口 ══ -->
+<script type="module" src="src/app.js?v=2"></script>
+</body>
+</html>

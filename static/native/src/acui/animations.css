@@ -1,0 +1,103 @@
+/* ACUI Card Animations */
+
+.acui-card {
+  position: fixed;
+  z-index: 200;
+  top: 80px;
+  right: 20px;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  background: var(--panel);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--ink);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease;
+  pointer-events: auto;
+}
+
+.acui-card.acui-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.acui-card.acui-exit-active {
+  transform: translateX(120%);
+  opacity: 0;
+}
+
+/* 多卡片堆疊 */
+.acui-card:nth-child(2) { top: 140px; }
+.acui-card:nth-child(3) { top: 200px; }
+.acui-card:nth-child(4) { top: 260px; }
+
+.acui-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.acui-card-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.acui-card-title {
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+  font-size: 13px;
+}
+
+.acui-card-close {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.acui-card-close:hover { color: var(--ink); }
+
+.acui-card-body {
+  color: var(--ink2);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.acui-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.acui-card-btn {
+  padding: 4px 12px;
+  background: var(--panel-hover);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.acui-card-btn:hover {
+  background: var(--brand-glow);
+  color: var(--brand-primary);
+}
+
+/* 卡片種類顏色 */
+.acui-card.acui-success { border-left: 3px solid var(--ok); }
+.acui-card.acui-error   { border-left: 3px solid var(--danger); }
+.acui-card.acui-warn    { border-left: 3px solid var(--warn); }
+.acui-card.acui-cron    { border-left: 3px solid var(--accent-cool); }
+.acui-card.acui-session { border-left: 3px solid var(--brand-primary); }

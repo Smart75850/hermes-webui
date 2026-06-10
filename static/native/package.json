@@ -1,0 +1,59 @@
+{
+  "name": "hermes-glass",
+  "productName": "Hermes Glass",
+  "version": "0.1.0",
+  "description": "A visually stunning native WebUI for Hermes Agent — dark tech aesthetics with glassmorphism panels and D3 memory graph.",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "author": "Hermes UI Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "npx serve . -p 8789 --no-clipboard",
+    "dev:live": "npx live-server --port=8789 --no-browser",
+    "build": "electron-builder --win",
+    "publish": "electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "better-sqlite3": "^12.8.0",
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.hermes.native-ui",
+    "productName": "Hermes Native UI",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "index.html",
+      "styles/**/*",
+      "package.json",
+      "!**/*.map"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Hermes Native UI"
+    }
+  }
+}

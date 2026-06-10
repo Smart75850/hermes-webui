@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.pyo
+data/
+sandbox/
+sessions/
+*.db
+*.db-shm
+*.db-wal
+electron/
