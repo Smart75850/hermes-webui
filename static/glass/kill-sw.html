@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Kill SW</title></head>
+<body>
+<h2>🧹 清除 Service Worker...</h2>
+<pre id="log"></pre>
+
+<script>
+var log = document.getElementById('log');
+
+function show(msg) { log.textContent += msg + '\n'; }
+
+show('1. 搵所有 SW...');
+navigator.serviceWorker.getRegistrations().then(function(regs) {
+  show('   搵到 ' + regs.length + ' 个 SW');
+
+  var done = 0;
+  regs.forEach(function(r) {
+    show('   注销: ' + r.scope);
+    r.unregister().then(function(ok) {
+      show('   ' + (ok ? '✅' : '⚠️') + ' ' + r.scope + ' 已注销');
+      done++;
+      if (done === regs.length) {
+        show('\n2. 清除所有缓存...');
+        caches.keys().then(function(names) {
+          show('   搵到 ' + names.length + ' 个缓存');
+          var cdone = 0;
+          names.forEach(function(n) {
+            caches.delete(n).then(function() {
+              show('   ✅ 删: ' + n);
+              cdone++;
+              if (cdone === names.length) {
+                show('\n✅ 全部清除完毕! 3秒后跳转...');
+                setTimeout(function() {
+                  location.href = '/static/glass/index.html';
+                }, 3000);
+              }
+            });
+          });
+          if (names.length === 0) {
+            show('\n✅ 冇缓存，3秒后跳转...');
+            setTimeout(function() {
+              location.href = '/static/glass/index.html';
+            }, 3000);
+          }
+        });
+      }
+    });
+  });
+  if (regs.length === 0) {
+    show('\n✅ 冇 SW，直接跳转...');
+    setTimeout(function() {
+      location.href = '/static/glass/index.html';
+    }, 1000);
+  }
+}).catch(function(e) {
+  show('❌ Error: ' + e.message);
+});
+</script>
+</body></html>

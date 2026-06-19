@@ -8820,10 +8820,15 @@ def _serve_static(handler, parsed):
     # is safe to cache aggressively: any redeploy changes the URL.
     version_values = parse_qs(parsed.query, keep_blank_values=True).get("v", [""])
     has_fingerprint = bool(version_values[0])
-    cache_control = (
-        "public, max-age=31536000, immutable" if has_fingerprint
-        else "public, max-age=300"
-    )
+    # Hermes Glass 开发阶段 — 唔缓存，Safari 会死咬旧版
+    is_glass = '/hg/' in parsed.path or '/glass/' in parsed.path or '/native/' in parsed.path
+    if is_glass:
+        cache_control = "no-cache, no-store, must-revalidate, max-age=0"
+    else:
+        cache_control = (
+            "public, max-age=31536000, immutable" if has_fingerprint
+            else "public, max-age=300"
+        )
 
     # 304 short-circuit on conditional GET.
     if handler.headers.get("If-None-Match") == etag:

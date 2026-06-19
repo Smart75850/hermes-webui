@@ -1,0 +1,260 @@
+/* ══════════════════════════════════════════════════════════════
+   Hermes Native UI — Theme System
+   参考白龙马 CSS 变量体系，3 套初始主题
+   全部颜色通过 CSS 变量驱动，一套代码多种风格
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 默认主题: Hermes Midnight (暗黑科技蓝) ── */
+:root {
+  /* 背景三层 */
+  --bg0: #0a1118;
+  --bg1: #0f1822;
+  --bg-deep: #060a10;
+
+  /* 文字三层 */
+  --ink: #d7e2ee;
+  --ink2: #9aabbe;
+  --dim: #5d6d80;
+
+  /* 线条 */
+  --line: rgba(138, 168, 200, 0.10);
+  --line-strong: rgba(138, 168, 200, 0.22);
+
+  /* 面板 */
+  --panel: rgba(11, 18, 26, 0.56);
+  --panel-hover: rgba(15, 24, 34, 0.72);
+  --console-bg: rgba(15, 24, 34, 0.42);
+
+  /* 强调色 */
+  --accent-cool: #8fb6d8;
+  --accent-warm: #d39872;
+
+  /* 图谱节点色 */
+  --node-low: #3a556e;
+  --node-high: #cfe3f5;
+
+  /* 光晕 */
+  --glow-halo: rgba(143, 182, 216, 0.10);
+  --glow-tint1: rgba(138, 158, 200, 0.08);
+  --glow-tint2: rgba(211, 152, 114, 0.06);
+
+  /* 连线 */
+  --link-stroke: rgba(143, 182, 216, 0.18);
+
+  /* 语义色 */
+  --ok: #74d89f;
+  --warn: #f0c866;
+  --danger: #ff6b6b;
+  --info: #6bb5ff;
+
+  /* 品牌色 Hermes */
+  --brand-primary: #7c5ce7;
+  --brand-secondary: #5b8def;
+  --brand-glow: rgba(124, 92, 231, 0.12);
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* 阴影 */
+  --shadow-panel: 0 4px 24px rgba(0,0,0,0.3);
+  --shadow-float: 0 8px 40px rgba(0,0,0,0.45);
+
+  /* 过渡 */
+  --transition-theme: 0.6s ease;
+  --transition-ui: 0.2s ease;
+  --transition-panel: 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── 主题: Aurora (极光紫 · Hermes 品牌色) ── */
+[data-theme="aurora"] {
+  --bg0: #0d0a1a;
+  --bg1: #161128;
+  --bg-deep: #070512;
+
+  --ink: #e4deff;
+  --ink2: #a89fd4;
+  --dim: #645b8a;
+
+  --line: rgba(170, 140, 240, 0.10);
+  --line-strong: rgba(170, 140, 240, 0.22);
+
+  --panel: rgba(14, 10, 26, 0.56);
+  --panel-hover: rgba(22, 17, 40, 0.72);
+  --console-bg: rgba(22, 17, 40, 0.42);
+
+  --accent-cool: #b098f0;
+  --accent-warm: #78e0c8;
+
+  --node-low: #4a3a6e;
+  --node-high: #e0d4ff;
+
+  --glow-halo: rgba(170, 140, 240, 0.12);
+  --glow-tint1: rgba(170, 140, 240, 0.09);
+  --glow-tint2: rgba(120, 224, 200, 0.06);
+
+  --link-stroke: rgba(170, 140, 240, 0.20);
+
+  --brand-glow: rgba(124, 92, 231, 0.18);
+}
+
+/* ── 主题: Forest (竹林绿 · 荧光屏复古) ── */
+[data-theme="forest"] {
+  --bg0: #050806;
+  --bg1: #0a120c;
+  --bg-deep: #020403;
+
+  --ink: #c8f0c8;
+  --ink2: #8fb48a;
+  --dim: #4a6b4e;
+
+  --line: rgba(140, 220, 140, 0.08);
+  --line-strong: rgba(140, 220, 140, 0.22);
+
+  --panel: rgba(6, 14, 8, 0.58);
+  --panel-hover: rgba(10, 22, 12, 0.74);
+  --console-bg: rgba(10, 22, 12, 0.42);
+
+  --accent-cool: #9fe09a;
+  --accent-warm: #f0c866;
+
+  --node-low: #2d5a36;
+  --node-high: #d4ffce;
+
+  --glow-halo: rgba(140, 220, 140, 0.10);
+  --glow-tint1: rgba(140, 220, 140, 0.08);
+  --glow-tint2: rgba(240, 200, 102, 0.05);
+
+  --link-stroke: rgba(140, 220, 140, 0.18);
+
+  --brand-glow: rgba(120, 220, 120, 0.12);
+}
+
+/* ── 主题: Crimson (暗红 · 暖色调) ── */
+[data-theme="crimson"] {
+  --bg0: #1a0a0c;
+  --bg1: #241215;
+  --bg-deep: #100608;
+
+  --ink: #f4e0e0;
+  --ink2: #c9a8a8;
+  --dim: #7a5a5a;
+
+  --line: rgba(230, 150, 150, 0.10);
+  --line-strong: rgba(230, 150, 150, 0.22);
+
+  --panel: rgba(26, 12, 14, 0.56);
+  --panel-hover: rgba(36, 18, 21, 0.72);
+  --console-bg: rgba(36, 18, 21, 0.42);
+
+  --accent-cool: #e8a0a0;
+  --accent-warm: #f2c27a;
+
+  --node-low: #5a3a3a;
+  --node-high: #fad8d8;
+
+  --glow-halo: rgba(230, 150, 150, 0.10);
+  --glow-tint1: rgba(230, 150, 150, 0.08);
+  --glow-tint2: rgba(242, 180, 120, 0.06);
+
+  --link-stroke: rgba(230, 150, 150, 0.20);
+
+  --brand-glow: rgba(200, 80, 80, 0.12);
+}
+
+/* ── 主题: Abyss (深海蓝 · 极简) ── */
+[data-theme="abyss"] {
+  --bg0: #060d18;
+  --bg1: #0a1425;
+  --bg-deep: #030810;
+
+  --ink: #d0dff0;
+  --ink2: #8a9fc0;
+  --dim: #4a6080;
+
+  --line: rgba(100, 150, 220, 0.10);
+  --line-strong: rgba(100, 150, 220, 0.22);
+
+  --panel: rgba(8, 14, 26, 0.56);
+  --panel-hover: rgba(12, 22, 38, 0.72);
+  --console-bg: rgba(12, 22, 38, 0.42);
+
+  --accent-cool: #6a9fd8;
+  --accent-warm: #d89860;
+
+  --node-low: #2a4a6e;
+  --node-high: #c0d8f0;
+
+  --glow-halo: rgba(100, 150, 220, 0.10);
+  --glow-tint1: rgba(100, 150, 220, 0.08);
+  --glow-tint2: rgba(200, 140, 80, 0.06);
+
+  --link-stroke: rgba(100, 150, 220, 0.18);
+
+  --brand-glow: rgba(80, 120, 220, 0.12);
+}
+
+/* ── 主题: Arctic (极地白 · 浅色科技风) ── */
+[data-theme="arctic"] {
+  --bg0: #f5f7f9;
+  --bg1: #eaeef2;
+  --bg-deep: #dfe4ea;
+
+  --ink: #1a2330;
+  --ink2: #4a5a6e;
+  --dim: #8a98a8;
+
+  --line: rgba(40, 60, 85, 0.08);
+  --line-strong: rgba(40, 60, 85, 0.18);
+
+  --panel: rgba(255, 255, 255, 0.54);
+  --panel-hover: rgba(255, 255, 255, 0.72);
+  --console-bg: rgba(255, 255, 255, 0.46);
+
+  --accent-cool: #3a6a8f;
+  --accent-warm: #b85a3a;
+
+  --node-low: #c0ccd8;
+  --node-high: #2a3e58;
+
+  --glow-halo: rgba(58, 106, 143, 0.06);
+  --glow-tint1: rgba(58, 106, 143, 0.05);
+  --glow-tint2: rgba(184, 90, 58, 0.04);
+
+  --link-stroke: rgba(40, 60, 85, 0.18);
+
+  --brand-glow: rgba(58, 106, 143, 0.10);
+}
+
+/* ── 主题: Sand (暖沙色 · 浅色暖调) ── */
+[data-theme="sand"] {
+  --bg0: #f2ede3;
+  --bg1: #eae2d2;
+  --bg-deep: #ddd2bc;
+
+  --ink: #2a231a;
+  --ink2: #6a5c48;
+  --dim: #9e917c;
+
+  --line: rgba(70, 55, 35, 0.08);
+  --line-strong: rgba(70, 55, 35, 0.20);
+
+  --panel: rgba(250, 246, 238, 0.54);
+  --panel-hover: rgba(250, 246, 238, 0.72);
+  --console-bg: rgba(250, 246, 238, 0.46);
+
+  --accent-cool: #7a5a2c;
+  --accent-warm: #c8502e;
+
+  --node-low: #cdbfa6;
+  --node-high: #3a2a16;
+
+  --glow-halo: rgba(122, 90, 44, 0.06);
+  --glow-tint1: rgba(122, 90, 44, 0.06);
+  --glow-tint2: rgba(200, 80, 46, 0.05);
+
+  --link-stroke: rgba(70, 55, 35, 0.18);
+
+  --brand-glow: rgba(122, 90, 44, 0.10);
+}

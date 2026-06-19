@@ -270,6 +270,10 @@ class Handler(BaseHTTPRequestHandler):
         extra_connect_src = getattr(self, "_csp_extra_connect_src", None)
         self.send_header("Content-Security-Policy-Report-Only", self.csp_report_only_policy(extra_connect_src))
         self.send_header("Report-To", self._CSP_REPORT_TO)
+        # 静态文件禁用缓存 — Safari 会死缓存 JS 导致更新唔生效
+        path = getattr(self, 'path', '')
+        if '/static/' in path and path.endswith(('.js', '.html', '.css', '.json')):
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
         super().end_headers()
 
     def log_message(self, fmt, *args): pass  # suppress default Apache-style log

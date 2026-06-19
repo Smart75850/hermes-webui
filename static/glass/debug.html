@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Hermes Glass Debug</title></head>
+<body>
+<h2>Hermes Glass — Mac Debug</h2>
+<pre id="log"></pre>
+<script type="module">
+const log = (...args) => {
+  document.getElementById('log').textContent += args.join(' ') + '\n';
+  console.log(...args);
+};
+
+log('1️⃣ 测试 API 连接...');
+try {
+  const r = await fetch('/api/sessions');
+  const d = await r.json();
+  log('   ✅ /api/sessions:', d.sessions?.length || 0, '个会话');
+} catch(e) {
+  log('   ❌ /api/sessions:', e.message);
+}
+
+log('2️⃣ 测试创建会话...');
+try {
+  const r = await fetch('/api/session/new', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({workspace: '/Users/apple/workspace'})
+  });
+  const d = await r.json();
+  log('   ✅ session created:', d.session?.session_id);
+  window.__sid = d.session?.session_id;
+} catch(e) {
+  log('   ❌ createSession:', e.message);
+}
+
+log('3️⃣ 测试聊天...');
+try {
+  const r = await fetch('/api/chat/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      session_id: window.__sid,
+      message: 'say hi in 3 words',
+      model: 'deepseek-v4-pro'
+    })
+  });
+  const d = await r.json();
+  log('   ✅ stream_id:', d.stream_id);
+  log('   ✅ 后端完全正常!');
+} catch(e) {
+  log('   ❌ chatStart:', e.message);
+}
+
+log('\n🎉 如果上面全部 ✅，后端 100% 冇问题');
+log('   问题系 Hermes Glass 前端 JS 逻辑');
+</script>
+</body></html>
